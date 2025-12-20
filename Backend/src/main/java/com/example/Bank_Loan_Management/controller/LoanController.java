@@ -1,0 +1,90 @@
+package com.example.Bank_Loan_Management.controller;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.Bank_Loan_Management.entity.LoanApplication;
+import com.example.Bank_Loan_Management.entity.User;
+import com.example.Bank_Loan_Management.repository.UserRepository;
+import com.example.Bank_Loan_Management.service.LoanService;
+
+@RestController
+public class LoanController {
+
+    private final LoanService loanService;
+    private final UserRepository userRepository;
+
+    public LoanController(LoanService loanService, UserRepository userRepository) {
+        this.loanService = loanService;
+        this.userRepository = userRepository;
+    }
+
+    // User endpoints
+    @PostMapping("/user/loans/apply")
+    public ResponseEntity<LoanApplication> applyForLoan(@AuthenticationPrincipal UserDetails userDetails,
+                                                         @RequestBody LoanApplicationRequest request) {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println("Found user: " + user.getId() + ", " + user.getUsername());
+        LoanApplication application = loanService.applyForLoan(user, request.getAmount(), request.getTerm(), request.getPurpose());
+        System.out.println("Created application with user_id: " + application.getUser().getId());
+        return ResponseEntity.ok(application);
+    }
+
+    @GetMapping("/user/loans")
+    public ResponseEntity<List<LoanApplication>> getMyLoans(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<LoanApplication> loans = loanService.getLoansByUser(user);
+        return ResponseEntity.ok(loans);
+    }
+
+    // Admin endpoints
+    @GetMapping("/admin/loans")
+    public ResponseEntity<List<LoanApplication>> getAllLoans() {
+        List<LoanApplication> loans = loanService.getAllLoans();
+        return ResponseEntity.ok(loans);
+    }
+
+    @GetMapping("/admin/loans/status/{status}")
+    public ResponseEntity<List<LoanApplication>> getLoansByStatus(@PathVariable String status) {
+        LoanApplication.Status enumStatus = LoanApplication.Status.valueOf(status.toUpperCase());
+        List<LoanApplication> loans = loanService.getLoansByStatus(enumStatus);
+        return ResponseEntity.ok(loans);
+    }
+
+    @PostMapping("/admin/loans/verify/{id}")
+    public ResponseEntity<LoanApplication> verifyLoan(@PathVariable Long id) {
+        LoanApplication application = loanService.verifyLoan(id);
+        return ResponseEntity.ok(application);
+    }
+
+    @PostMapping("/admin/loans/decide/{id}")
+    public ResponseEntity<LoanApplication> approveOrRejectLoan(@PathVariable Long id) {
+        LoanApplication application = loanService.approveOrRejectLoan(id);
+        return ResponseEntity.ok(application);
+    }
+
+    public static class LoanApplicationRequest {
+        private BigDecimal amount;
+        private Integer term;
+        private String purpose;
+
+        // getters and setters
+        public BigDecimal getAmount() { return amount; }
+        public void setAmount(BigDecimal amount) { this.amount = amount; }
+        public Integer getTerm() { return term; }
+        public void setTerm(Integer term) { this.term = term; }
+        public String getPurpose() { return purpose; }
+        public void setPurpose(String purpose) { this.purpose = purpose; }
+    }
+}
