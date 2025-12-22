@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.Bank_Loan_Management.entity.LoanApplication;
 import com.example.Bank_Loan_Management.entity.User;
@@ -25,6 +26,7 @@ public class LoanService {
         this.notificationService = notificationService;
     }
 
+    @Transactional
     public LoanApplication applyForLoan(User user, BigDecimal amount, Integer term, String purpose) {
         LoanApplication application = new LoanApplication();
         application.setUser(user);
@@ -45,6 +47,7 @@ public class LoanService {
         return saved;
     }
 
+    @Transactional
     public LoanApplication verifyLoan(Long applicationId) {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
@@ -61,6 +64,7 @@ public class LoanService {
         return saved;
     }
 
+    @Transactional
     public LoanApplication approveOrRejectLoan(Long applicationId) {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
