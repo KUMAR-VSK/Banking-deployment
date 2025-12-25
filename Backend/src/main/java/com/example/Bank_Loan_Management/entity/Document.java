@@ -1,9 +1,5 @@
 package com.example.Bank_Loan_Management.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,61 +9,49 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "loan_applications")
+@Table(name = "documents")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanApplication {
+public class Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "loan_application_id")
+    private LoanApplication loanApplication;
+
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "loanApplication")
-    private List<Document> documents;
+    @Column(nullable = false)
+    private String documentType;
 
     @Column(nullable = false)
-    private boolean documentsVerified = false;
+    private String fileName;
 
     @Column(nullable = false)
-    private BigDecimal amount;
+    private String filePath;
 
     @Column(nullable = false)
-    private Integer term; // in months
+    private String contentType;
 
     @Column(nullable = false)
-    private String purpose;
+    private Long fileSize;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private Integer creditScore;
-
-    private LocalDateTime appliedDate;
-
-    private LocalDateTime decisionDate;
-
-    private BigDecimal approvedAmount;
-
-    private BigDecimal paidAmount;
-
-    private BigDecimal pendingAmount;
-
-    @Column(precision = 5, scale = 2)
-    private BigDecimal interestRate;
-
     public enum Status {
-        APPLIED, VERIFIED, APPROVED, REJECTED
+        UPLOADED, VERIFIED, REJECTED
     }
 }

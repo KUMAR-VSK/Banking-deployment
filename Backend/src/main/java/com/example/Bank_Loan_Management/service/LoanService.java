@@ -35,6 +35,7 @@ public class LoanService {
         application.setPurpose(purpose);
         application.setStatus(LoanApplication.Status.APPLIED);
         application.setAppliedDate(LocalDateTime.now());
+        application.setDocumentsVerified(false);
 
         // Calculate credit score
         int creditScore = creditScoringService.calculateCreditScore(amount, term, purpose);
@@ -54,6 +55,11 @@ public class LoanService {
 
         if (application.getStatus() != LoanApplication.Status.APPLIED) {
             throw new RuntimeException("Application is not in APPLIED status");
+        }
+
+        // Check if all documents are verified
+        if (!application.isDocumentsVerified()) {
+            throw new RuntimeException("All documents must be verified before loan verification");
         }
 
         application.setStatus(LoanApplication.Status.VERIFIED);
@@ -91,6 +97,53 @@ public class LoanService {
         LoanApplication saved = loanApplicationRepository.save(application);
 
         notificationService.sendLoanStatusUpdate(application.getUser().getId(), application.getStatus().toString());
+
+        return saved;
+    }
+
+    @Transactional
+    public LoanApplication rejectLoan(Long applicationId) {
+        LoanApplication application = loanApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
+            throw new RuntimeException("Application is not in VERIFIED status");
+        }
+
+        application.setStatus(LoanApplication.Status.REJECTED);
+        application.setDecisionDate(LocalDateTime.now());
+
+        LoanApplication saved = loanApplicationRepository.save(application);
+
+        notificationService.sendLoanStatusUpdate(application.getUser().getId(), "REJECTED");
+
+        return saved;
+    }
+
+    @Transactional
+    public LoanApplication approveLoan(Long applicationId) {
+        LoanApplication application = loanApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
+            throw new RuntimeException("Application is not in VERIFIED status");
+        }
+
+        application.setStatus(LoanApplication.Status.APPROVED);
+        application.setDecisionDate(LocalDateTime.now());
+
+        // Set approval details
+        application.setApprovedAmount(application.getAmount());
+        BigDecimal interestRate = BigDecimal.valueOf(8.5); // Default interest rate for manual approvals
+        application.setInterestRate(interestRate);
+        BigDecimal interestAmount = application.getAmount().multiply(interestRate).divide(BigDecimal.valueOf(100));
+        BigDecimal totalAmount = application.getAmount().add(interestAmount);
+        application.setPaidAmount(BigDecimal.ZERO);
+        application.setPendingAmount(totalAmount);
+
+        LoanApplication saved = loanApplicationRepository.save(application);
+
+        notificationService.sendLoanStatusUpdate(application.getUser().getId(), "APPROVED");
 
         return saved;
     }
