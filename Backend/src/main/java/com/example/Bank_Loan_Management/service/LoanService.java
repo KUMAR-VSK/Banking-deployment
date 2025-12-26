@@ -58,8 +58,8 @@ public class LoanService {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        if (application.getStatus() != LoanApplication.Status.APPLIED) {
-            throw new RuntimeException("Application is not in APPLIED status");
+        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
+            throw new RuntimeException("Application is not in VERIFIED status");
         }
 
         application.setStatus(LoanApplication.Status.REJECTED);
@@ -79,8 +79,8 @@ public class LoanService {
 
         System.out.println("Approving loan application: " + applicationId + ", current status: " + application.getStatus());
 
-        if (application.getStatus() != LoanApplication.Status.APPLIED) {
-            throw new RuntimeException("Application is not in APPLIED status: " + application.getStatus());
+        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
+            throw new RuntimeException("Application is not in VERIFIED status: " + application.getStatus());
         }
 
         application.setStatus(LoanApplication.Status.APPROVED);

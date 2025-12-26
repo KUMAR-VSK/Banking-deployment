@@ -44,8 +44,30 @@ public class AuthService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setEmail(email);
-        // For demo purposes, give ADMIN role to all users
-        user.setRole(User.Role.ADMIN);
+        // Only testuser gets ADMIN role, all others get USER role
+        if ("testuser".equals(username)) {
+            user.setRole(User.Role.ADMIN);
+        } else {
+            user.setRole(User.Role.USER);
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public User register(String username, String password, String email, User.Role role) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setEmail(email);
+        user.setRole(role);
 
         return userRepository.save(user);
     }

@@ -84,10 +84,14 @@ public class DocumentService {
                         .anyMatch(doc -> doc.getStatus() == Document.Status.VERIFIED));
 
         if (allTypesVerified) {
-            // Update all loan applications for this user to mark documents as verified
+            // Update all loan applications for this user to mark documents as verified and change status to VERIFIED
             List<LoanApplication> userApplications = loanApplicationRepository.findByUser(document.getUser());
             for (LoanApplication application : userApplications) {
                 application.setDocumentsVerified(true);
+                // Change status from APPLIED to VERIFIED so managers can approve
+                if (application.getStatus() == LoanApplication.Status.APPLIED) {
+                    application.setStatus(LoanApplication.Status.VERIFIED);
+                }
                 loanApplicationRepository.save(application);
             }
         }

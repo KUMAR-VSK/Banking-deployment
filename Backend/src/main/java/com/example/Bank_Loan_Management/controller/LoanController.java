@@ -184,35 +184,55 @@ public class LoanController {
         return ResponseEntity.ok(loans);
     }
 
-
-    @PostMapping("/admin/loans/approve/{id}")
-    public ResponseEntity<LoanApplication> approveLoan(@PathVariable Long id) {
-        LoanApplication application = loanService.approveLoan(id);
-        return ResponseEntity.ok(application);
+    @GetMapping("/admin/documents")
+    public ResponseEntity<List<Document>> getAllDocuments() {
+        List<Document> documents = documentService.getAllDocuments();
+        return ResponseEntity.ok(documents);
     }
 
-    @PostMapping("/admin/loans/reject/{id}")
-    public ResponseEntity<LoanApplication> rejectLoan(@PathVariable Long id) {
-        LoanApplication application = loanService.rejectLoan(id);
-        return ResponseEntity.ok(application);
-    }
-
-    @PostMapping("/admin/documents/verify/{id}")
+    // Loan Manager endpoints
+    @PostMapping("/loan-manager/documents/verify/{id}")
     public ResponseEntity<Document> verifyDocument(@PathVariable Long id) {
         Document document = documentService.verifyDocument(id);
         return ResponseEntity.ok(document);
     }
 
-    @PostMapping("/admin/documents/reject/{id}")
+    @PostMapping("/loan-manager/documents/reject/{id}")
     public ResponseEntity<Document> rejectDocument(@PathVariable Long id) {
         Document document = documentService.rejectDocument(id);
         return ResponseEntity.ok(document);
     }
 
-    @GetMapping("/admin/documents")
-    public ResponseEntity<List<Document>> getAllDocuments() {
+    @GetMapping("/loan-manager/documents")
+    public ResponseEntity<List<Document>> getAllDocumentsForVerification() {
         List<Document> documents = documentService.getAllDocuments();
         return ResponseEntity.ok(documents);
+    }
+
+    // Manager endpoints
+    @PostMapping("/manager/loans/approve/{id}")
+    public ResponseEntity<LoanApplication> approveLoan(@PathVariable Long id) {
+        LoanApplication application = loanService.approveLoan(id);
+        return ResponseEntity.ok(application);
+    }
+
+    @PostMapping("/manager/loans/reject/{id}")
+    public ResponseEntity<LoanApplication> rejectLoan(@PathVariable Long id) {
+        LoanApplication application = loanService.rejectLoan(id);
+        return ResponseEntity.ok(application);
+    }
+
+    @GetMapping("/manager/loans")
+    public ResponseEntity<List<LoanApplication>> getLoansForApproval() {
+        List<LoanApplication> loans = loanService.getAllLoans();
+        return ResponseEntity.ok(loans);
+    }
+
+    @GetMapping("/manager/loans/status/{status}")
+    public ResponseEntity<List<LoanApplication>> getLoansByStatusForApproval(@PathVariable String status) {
+        LoanApplication.Status enumStatus = LoanApplication.Status.valueOf(status.toUpperCase());
+        List<LoanApplication> loans = loanService.getLoansByStatus(enumStatus);
+        return ResponseEntity.ok(loans);
     }
 
     public static class LoanApplicationRequest {
