@@ -44,7 +44,8 @@ public class AuthService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setEmail(email);
-        user.setRole("testuser".equals(username) ? User.Role.ADMIN : User.Role.USER);
+        // For demo purposes, give ADMIN role to all users
+        user.setRole(User.Role.ADMIN);
 
         return userRepository.save(user);
     }

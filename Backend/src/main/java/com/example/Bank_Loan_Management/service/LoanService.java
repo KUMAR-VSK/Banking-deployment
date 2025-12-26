@@ -52,66 +52,14 @@ public class LoanService {
         return saved;
     }
 
-    @Transactional
-    public LoanApplication verifyLoan(Long applicationId) {
-        LoanApplication application = loanApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
-
-        if (application.getStatus() != LoanApplication.Status.APPLIED) {
-            throw new RuntimeException("Application is not in APPLIED status");
-        }
-
-        // Check if all documents are verified
-        if (!application.isDocumentsVerified()) {
-            throw new RuntimeException("All documents must be verified before loan verification");
-        }
-
-        application.setStatus(LoanApplication.Status.VERIFIED);
-        LoanApplication saved = loanApplicationRepository.save(application);
-
-        notificationService.sendLoanStatusUpdate(application.getUser().getId(), "VERIFIED");
-
-        return saved;
-    }
-
-    @Transactional
-    public LoanApplication approveOrRejectLoan(Long applicationId) {
-        LoanApplication application = loanApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
-
-        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
-            throw new RuntimeException("Application is not in VERIFIED status");
-        }
-
-        boolean eligible = creditScoringService.isEligible(application.getCreditScore(), application.getAmount());
-
-        application.setStatus(eligible ? LoanApplication.Status.APPROVED : LoanApplication.Status.REJECTED);
-        application.setDecisionDate(LocalDateTime.now());
-
-        if (eligible) {
-            application.setApprovedAmount(application.getAmount());
-            BigDecimal interestRate = creditScoringService.getInterestRate(application.getPurpose());
-            application.setInterestRate(interestRate);
-            BigDecimal interestAmount = application.getAmount().multiply(interestRate).divide(BigDecimal.valueOf(100));
-            BigDecimal totalAmount = application.getAmount().add(interestAmount);
-            application.setPaidAmount(BigDecimal.ZERO);
-            application.setPendingAmount(totalAmount);
-        }
-
-        LoanApplication saved = loanApplicationRepository.save(application);
-
-        notificationService.sendLoanStatusUpdate(application.getUser().getId(), application.getStatus().toString());
-
-        return saved;
-    }
 
     @Transactional
     public LoanApplication rejectLoan(Long applicationId) {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
-            throw new RuntimeException("Application is not in VERIFIED status");
+        if (application.getStatus() != LoanApplication.Status.APPLIED) {
+            throw new RuntimeException("Application is not in APPLIED status");
         }
 
         application.setStatus(LoanApplication.Status.REJECTED);
@@ -129,17 +77,25 @@ public class LoanService {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        if (application.getStatus() != LoanApplication.Status.VERIFIED) {
-            throw new RuntimeException("Application is not in VERIFIED status");
+        System.out.println("Approving loan application: " + applicationId + ", current status: " + application.getStatus());
+
+        if (application.getStatus() != LoanApplication.Status.APPLIED) {
+            throw new RuntimeException("Application is not in APPLIED status: " + application.getStatus());
         }
 
         application.setStatus(LoanApplication.Status.APPROVED);
         application.setDecisionDate(LocalDateTime.now());
 
-        // Set approval details
+        // Set approval details - use the interest rate that was set during application
         application.setApprovedAmount(application.getAmount());
-        BigDecimal interestRate = BigDecimal.valueOf(8.5); // Default interest rate for manual approvals
-        application.setInterestRate(interestRate);
+
+        // Ensure interest rate is set (fallback to 8.5% if not set)
+        BigDecimal interestRate = application.getInterestRate();
+        if (interestRate == null || interestRate.compareTo(BigDecimal.ZERO) <= 0) {
+            interestRate = BigDecimal.valueOf(8.5);
+            application.setInterestRate(interestRate);
+        }
+
         BigDecimal interestAmount = application.getAmount().multiply(interestRate).divide(BigDecimal.valueOf(100));
         BigDecimal totalAmount = application.getAmount().add(interestAmount);
         application.setPaidAmount(BigDecimal.ZERO);
