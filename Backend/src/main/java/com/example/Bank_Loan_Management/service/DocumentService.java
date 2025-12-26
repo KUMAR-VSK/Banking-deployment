@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,12 +72,18 @@ public class DocumentService {
         document.setStatus(Document.Status.VERIFIED);
         Document saved = documentRepository.save(document);
 
-        // Check if all documents for this user are verified
+        // Check if all document types have at least one verified document
         List<Document> userDocuments = documentRepository.findByUser(document.getUser());
-        boolean allVerified = userDocuments.stream()
-                .allMatch(doc -> doc.getStatus() == Document.Status.VERIFIED);
 
-        if (allVerified) {
+        // Group documents by type and check if each type has at least one verified document
+        boolean allTypesVerified = userDocuments.stream()
+                .collect(Collectors.groupingBy(Document::getDocumentType))
+                .entrySet()
+                .stream()
+                .allMatch(entry -> entry.getValue().stream()
+                        .anyMatch(doc -> doc.getStatus() == Document.Status.VERIFIED));
+
+        if (allTypesVerified) {
             // Update all loan applications for this user to mark documents as verified
             List<LoanApplication> userApplications = loanApplicationRepository.findByUser(document.getUser());
             for (LoanApplication application : userApplications) {
@@ -92,7 +99,16 @@ public class DocumentService {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
         document.setStatus(Document.Status.REJECTED);
-        return documentRepository.save(document);
+        Document saved = documentRepository.save(document);
+
+        // When a document is rejected, mark all loan applications for this user as not verified
+        List<LoanApplication> userApplications = loanApplicationRepository.findByUser(document.getUser());
+        for (LoanApplication application : userApplications) {
+            application.setDocumentsVerified(false);
+            loanApplicationRepository.save(application);
+        }
+
+        return saved;
     }
 
     public List<Document> getAllDocuments() {

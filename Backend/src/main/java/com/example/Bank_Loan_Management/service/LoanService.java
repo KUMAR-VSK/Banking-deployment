@@ -37,6 +37,10 @@ public class LoanService {
         application.setAppliedDate(LocalDateTime.now());
         application.setDocumentsVerified(false);
 
+        // Set interest rate based on purpose
+        BigDecimal interestRate = creditScoringService.getInterestRate(purpose);
+        application.setInterestRate(interestRate);
+
         // Calculate credit score
         int creditScore = creditScoringService.calculateCreditScore(amount, term, purpose);
         application.setCreditScore(creditScore);

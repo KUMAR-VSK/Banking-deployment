@@ -119,41 +119,33 @@ public class LoanController {
 
     @PostMapping("/user/loans/apply")
     public ResponseEntity<?> applyForLoan(@AuthenticationPrincipal UserDetails userDetails,
-                                          @RequestBody LoanApplicationRequest request) {
+                                           @RequestBody LoanApplicationRequest request) {
         try {
             logger.info("Loan application request for user: {}", userDetails.getUsername());
-            
+
             if (userDetails == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
             }
-            
+
             Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
             if (userOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
-            
+
             User user = userOpt.get();
             logger.info("Found user: {} (ID: {})", user.getUsername(), user.getId());
 
-            // Check if user has uploaded required documents
+            // Check if user has uploaded at least one document
             List<Document> userDocuments = documentService.getDocumentsByUser(user);
             if (userDocuments.isEmpty()) {
                 logger.warn("User {} has no documents uploaded", user.getUsername());
-                return ResponseEntity.badRequest().body("Please upload required documents before applying for loan");
-            }
-
-            // Check if all documents are verified
-            boolean allDocumentsVerified = userDocuments.stream()
-                    .allMatch(doc -> doc.getStatus() == Document.Status.VERIFIED);
-            if (!allDocumentsVerified) {
-                logger.warn("User {} has unverified documents", user.getUsername());
-                return ResponseEntity.badRequest().body("All documents must be verified before applying for loan");
+                return ResponseEntity.badRequest().body("Please upload at least one document before applying for loan");
             }
 
             LoanApplication application = loanService.applyForLoan(user, request.getAmount(), request.getTerm(), request.getPurpose());
             logger.info("Loan application created successfully: {} for user: {}", application.getId(), user.getUsername());
             return ResponseEntity.ok(application);
-            
+
         } catch (Exception e) {
             logger.error("Error processing loan application for user: {}", userDetails.getUsername(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
