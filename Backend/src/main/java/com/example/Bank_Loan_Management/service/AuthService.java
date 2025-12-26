@@ -57,7 +57,7 @@ public class AuthService {
         if ("testuser".equals(username) && "testuser".equals(password)) {
             // Authenticate manually
             Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, List.of());
-            String token = jwtUtil.generateToken(authentication.getName());
+            String token = jwtUtil.generateToken(authentication.getName(), user.getRole().name());
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("userId", user.getId());
@@ -70,7 +70,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, password)
         );
 
-        String token = jwtUtil.generateToken(authentication.getName());
+        String token = jwtUtil.generateToken(authentication.getName(), user.getRole().name());
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("userId", user.getId());

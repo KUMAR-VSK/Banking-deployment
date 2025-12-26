@@ -3,7 +3,11 @@ package com.example.Bank_Loan_Management.controller;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +28,10 @@ import com.example.Bank_Loan_Management.service.DocumentService;
 import com.example.Bank_Loan_Management.service.LoanService;
 
 @RestController
+@RequestMapping("/api")
 public class LoanController {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoanController.class);
 
     private final LoanService loanService;
     private final UserRepository userRepository;
@@ -37,50 +45,120 @@ public class LoanController {
 
     // User endpoints
     @PostMapping("/user/documents/upload")
-    public ResponseEntity<Document> uploadDocument(@AuthenticationPrincipal UserDetails userDetails,
-                                                   @RequestParam("file") MultipartFile file,
-                                                   @RequestParam("documentType") String documentType) {
+    public ResponseEntity<?> uploadDocument(@AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestParam("file") MultipartFile file,
+                                            @RequestParam("documentType") String documentType) {
         try {
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            logger.info("Document upload request for user: {}, documentType: {}", 
+                       userDetails.getUsername(), documentType);
+            
+            if (userDetails == null) {
+                logger.warn("Unauthorized document upload attempt - no authentication");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
+            }
+            
+            Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+            if (userOpt.isEmpty()) {
+                logger.warn("User not found: {}", userDetails.getUsername());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            
+            User user = userOpt.get();
+            logger.info("Found user: {} (ID: {})", user.getUsername(), user.getId());
+            
+            if (file.isEmpty()) {
+                logger.warn("Empty file uploaded for user: {}", user.getUsername());
+                return ResponseEntity.badRequest().body("Please select a file to upload");
+            }
+            
+            if (documentType == null || documentType.trim().isEmpty()) {
+                logger.warn("Missing document type for user: {}", user.getUsername());
+                return ResponseEntity.badRequest().body("Document type is required");
+            }
+            
             Document document = documentService.uploadDocument(user, file, documentType);
+            logger.info("Document uploaded successfully: {} for user: {}", document.getFileName(), user.getUsername());
             return ResponseEntity.ok(document);
+            
         } catch (IOException e) {
-            return ResponseEntity.status(500).build();
+            logger.error("IO error during document upload for user: {}", userDetails.getUsername(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload document: File processing error");
+        } catch (Exception e) {
+            logger.error("Unexpected error during document upload for user: {}", userDetails.getUsername(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload document: " + e.getMessage());
         }
     }
 
     @GetMapping("/user/documents")
-    public ResponseEntity<List<Document>> getMyDocuments(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        List<Document> documents = documentService.getDocumentsByUser(user);
-        return ResponseEntity.ok(documents);
+    public ResponseEntity<?> getMyDocuments(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            logger.info("Fetching documents for user: {}", userDetails.getUsername());
+            
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
+            }
+            
+            Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            
+            User user = userOpt.get();
+            List<Document> documents = documentService.getDocumentsByUser(user);
+            logger.info("Found {} documents for user: {}", documents.size(), user.getUsername());
+            return ResponseEntity.ok(documents);
+            
+        } catch (Exception e) {
+            logger.error("Error fetching documents for user: {}", userDetails.getUsername(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch documents: " + e.getMessage());
+        }
     }
 
     @PostMapping("/user/loans/apply")
-    public ResponseEntity<LoanApplication> applyForLoan(@AuthenticationPrincipal UserDetails userDetails,
-                                                         @RequestBody LoanApplicationRequest request) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        System.out.println("Found user: " + user.getId() + ", " + user.getUsername());
+    public ResponseEntity<?> applyForLoan(@AuthenticationPrincipal UserDetails userDetails,
+                                          @RequestBody LoanApplicationRequest request) {
+        try {
+            logger.info("Loan application request for user: {}", userDetails.getUsername());
+            
+            if (userDetails == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication required");
+            }
+            
+            Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            
+            User user = userOpt.get();
+            logger.info("Found user: {} (ID: {})", user.getUsername(), user.getId());
 
-        // Check if user has uploaded required documents
-        List<Document> userDocuments = documentService.getDocumentsByUser(user);
-        if (userDocuments.isEmpty()) {
-            throw new RuntimeException("Please upload required documents before applying for loan");
+            // Check if user has uploaded required documents
+            List<Document> userDocuments = documentService.getDocumentsByUser(user);
+            if (userDocuments.isEmpty()) {
+                logger.warn("User {} has no documents uploaded", user.getUsername());
+                return ResponseEntity.badRequest().body("Please upload required documents before applying for loan");
+            }
+
+            // Check if all documents are verified
+            boolean allDocumentsVerified = userDocuments.stream()
+                    .allMatch(doc -> doc.getStatus() == Document.Status.VERIFIED);
+            if (!allDocumentsVerified) {
+                logger.warn("User {} has unverified documents", user.getUsername());
+                return ResponseEntity.badRequest().body("All documents must be verified before applying for loan");
+            }
+
+            LoanApplication application = loanService.applyForLoan(user, request.getAmount(), request.getTerm(), request.getPurpose());
+            logger.info("Loan application created successfully: {} for user: {}", application.getId(), user.getUsername());
+            return ResponseEntity.ok(application);
+            
+        } catch (Exception e) {
+            logger.error("Error processing loan application for user: {}", userDetails.getUsername(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to process loan application: " + e.getMessage());
         }
-
-        // Check if all documents are verified
-        boolean allDocumentsVerified = userDocuments.stream()
-                .allMatch(doc -> doc.getStatus() == Document.Status.VERIFIED);
-        if (!allDocumentsVerified) {
-            throw new RuntimeException("All documents must be verified before applying for loan");
-        }
-
-        LoanApplication application = loanService.applyForLoan(user, request.getAmount(), request.getTerm(), request.getPurpose());
-        System.out.println("Created application with user_id: " + application.getUser().getId());
-        return ResponseEntity.ok(application);
     }
 
     @GetMapping("/user/loans")
