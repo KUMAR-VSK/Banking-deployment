@@ -94,4 +94,8 @@ public class DocumentService {
         document.setStatus(Document.Status.REJECTED);
         return documentRepository.save(document);
     }
+
+    public List<Document> getAllDocuments() {
+        return documentRepository.findAll();
+    }
 }

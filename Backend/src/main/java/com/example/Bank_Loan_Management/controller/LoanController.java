@@ -207,6 +207,24 @@ public class LoanController {
         return ResponseEntity.ok(application);
     }
 
+    @PostMapping("/admin/documents/verify/{id}")
+    public ResponseEntity<Document> verifyDocument(@PathVariable Long id) {
+        Document document = documentService.verifyDocument(id);
+        return ResponseEntity.ok(document);
+    }
+
+    @PostMapping("/admin/documents/reject/{id}")
+    public ResponseEntity<Document> rejectDocument(@PathVariable Long id) {
+        Document document = documentService.rejectDocument(id);
+        return ResponseEntity.ok(document);
+    }
+
+    @GetMapping("/admin/documents")
+    public ResponseEntity<List<Document>> getAllDocuments() {
+        List<Document> documents = documentService.getAllDocuments();
+        return ResponseEntity.ok(documents);
+    }
+
     public static class LoanApplicationRequest {
         private BigDecimal amount;
         private Integer term;

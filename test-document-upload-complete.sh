@@ -72,7 +72,7 @@ echo "   Creating test document..."
 echo "This is a test document for upload testing." > test-document.txt
 
 # Upload the document
-UPLOAD_RESPONSE=$(curl -s -X POST http://localhost:8080/user/documents/upload \
+UPLOAD_RESPONSE=$(curl -s -X POST http://localhost:8080/api/user/documents/upload \
     -H "Authorization: Bearer $TOKEN" \
     -F "file=@test-document.txt" \
     -F "documentType=IDENTITY")
@@ -87,7 +87,7 @@ fi
 
 # 5. Test fetching documents
 echo "5. Testing document retrieval..."
-FETCH_RESPONSE=$(curl -s -X GET http://localhost:8080/user/documents \
+FETCH_RESPONSE=$(curl -s -X GET http://localhost:8080/api/user/documents \
     -H "Authorization: Bearer $TOKEN")
 
 if echo "$FETCH_RESPONSE" | grep -q "fileName"; then
