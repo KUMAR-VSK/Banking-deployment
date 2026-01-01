@@ -1,11 +1,21 @@
 package com.example.Bank_Loan_Management.service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.Bank_Loan_Management.entity.InterestRate;
+import com.example.Bank_Loan_Management.repository.InterestRateRepository;
+
 @Service
 public class CreditScoringService {
+
+    private final InterestRateRepository interestRateRepository;
+
+    public CreditScoringService(InterestRateRepository interestRateRepository) {
+        this.interestRateRepository = interestRateRepository;
+    }
 
     public int calculateCreditScore(BigDecimal amount, Integer term, String purpose) {
         // Simple mock credit scoring logic
@@ -44,13 +54,22 @@ public class CreditScoringService {
     }
 
     public BigDecimal getInterestRate(String purpose) {
+        Optional<InterestRate> interestRateOpt = interestRateRepository.findByPurpose(purpose.toLowerCase());
+        if (interestRateOpt.isPresent()) {
+            return interestRateOpt.get().getRate();
+        }
+        // Fallback to default rates if not set in DB
         switch (purpose.toLowerCase()) {
-            case "housing": return BigDecimal.valueOf(5.0);
-            case "education": return BigDecimal.valueOf(4.0);
-            case "personal": return BigDecimal.valueOf(9.0);
-            case "health": return BigDecimal.valueOf(7.0);
-            case "professional": return BigDecimal.valueOf(8.0);
-            case "car": return BigDecimal.valueOf(6.0);
+            case "home purchase": return BigDecimal.valueOf(8.5);
+            case "car purchase": return BigDecimal.valueOf(9.5);
+            case "education": return BigDecimal.valueOf(7.5);
+            case "business": return BigDecimal.valueOf(10.5);
+            case "personal": return BigDecimal.valueOf(12.0);
+            case "health": return BigDecimal.valueOf(8.0);
+            case "travel": return BigDecimal.valueOf(11.0);
+            case "wedding": return BigDecimal.valueOf(9.0);
+            case "home renovation": return BigDecimal.valueOf(8.75);
+            case "debt consolidation": return BigDecimal.valueOf(11.5);
             default: return BigDecimal.valueOf(10.0);
         }
     }
