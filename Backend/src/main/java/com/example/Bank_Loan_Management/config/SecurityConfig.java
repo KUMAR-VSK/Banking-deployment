@@ -61,7 +61,8 @@ public class SecurityConfig {
         if (allowedOrigins == null || allowedOrigins.isEmpty()) {
             allowedOrigins = "http://localhost:3000,http://localhost:3001";
         }
-        configuration.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.split(",")));
+        // Allow all origins temporarily for debugging
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
