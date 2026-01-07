@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import IntegratedLoanCalculator from './IntegratedLoanCalculator';
-
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 function UserDashboard({ user }) {
   const [loans, setLoans] = useState([]);
@@ -289,68 +285,6 @@ function UserDashboard({ user }) {
     return sortOrder === 'desc' ? b.id - a.id : a.id - b.id;
   });
 
-  // Prepare doughnut chart data
-  const getLoanStatusData = () => {
-    const statusCounts = loans.reduce((acc, loan) => {
-      acc[loan.status] = (acc[loan.status] || 0) + 1;
-      return acc;
-    }, {});
-
-    return {
-      labels: ['Applied', 'Verified', 'Approved', 'Rejected'],
-      datasets: [{
-        data: [
-          statusCounts['APPLIED'] || 0,
-          statusCounts['VERIFIED'] || 0,
-          statusCounts['APPROVED'] || 0,
-          statusCounts['REJECTED'] || 0
-        ],
-        backgroundColor: [
-          '#FF6B6B', // Coral Red for Applied
-          '#4ECDC4', // Turquoise for Verified
-          '#45B7D1', // Sky Blue for Approved
-          '#96CEB4'  // Sage Green for Rejected
-        ],
-        hoverBackgroundColor: [
-          '#FF5252', // Darker Coral Red
-          '#26A69A', // Darker Turquoise
-          '#1976D2', // Darker Sky Blue
-          '#66BB6A'  // Darker Sage Green
-        ],
-        borderWidth: 2,
-        borderColor: '#ffffff'
-      }]
-    };
-  };
-
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          padding: 20,
-          usePointStyle: true,
-          font: {
-            size: 12
-          }
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            const label = context.label || '';
-            const value = context.parsed || 0;
-            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-            return `${label}: ${value} (${percentage}%)`;
-          }
-        }
-      }
-    }
-  };
-
   // Documents are associated with loans when applications are submitted
 
   return (
@@ -620,18 +554,6 @@ function UserDashboard({ user }) {
 
 
 
-      {/* Loan Status Distribution Chart */}
-      <div className="loan-chart card">
-        <h3>📊 Loan Status Distribution</h3>
-        <div className="chart-container" style={{ height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {loans.length > 0 ? (
-            <Doughnut data={getLoanStatusData()} options={doughnutOptions} />
-          ) : (
-            <p className="no-data-chart">No loan data available to display chart</p>
-          )}
-        </div>
-      </div>
-
       <div className="document-status card">
         <h3>📄 Document Status</h3>
         <div className="documents-list">
@@ -689,5 +611,7 @@ function UserDashboard({ user }) {
     
   );
 }
+
+
 
 export default UserDashboard;
