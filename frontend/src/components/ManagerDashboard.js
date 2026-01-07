@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api';
 
 function ManagerDashboard({ user, addNotification }) {
   const [loans, setLoans] = useState([]);
@@ -16,16 +17,9 @@ function ManagerDashboard({ user, addNotification }) {
 
   const fetchLoans = async () => {
     try {
-      const response = await fetch('/api/manager/loans', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setLoans(data);
-        setLoading(false);
-      }
+      const response = await api.get('/api/manager/loans');
+      setLoans(response.data);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching loans:', error);
       addNotification('Failed to fetch loans', 'error');
