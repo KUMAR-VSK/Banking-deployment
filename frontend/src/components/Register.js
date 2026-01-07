@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -38,27 +39,20 @@ function Register() {
 
     setLoading(true);
     try {
-      const res = await fetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      await axios.post('/auth/register', formData);
 
-      if (res.ok) {
-        setSuccess('🎉 Registration successful! Please login.');
-        setFormData({ username: '', email: '', password: '' });
-      } else {
-        try {
-          const data = await res.json();
-          setError(data.error || data.message || 'Registration failed');
-        } catch (parseError) {
-          setError(`Registration failed with status ${res.status}`);
-        }
-      }
+      setSuccess('🎉 Registration successful! Please login.');
+      setFormData({ username: '', email: '', password: '' });
     } catch (err) {
-      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      if (err.response) {
+        // Server responded with error status
+        const errorData = err.response.data;
+        setError(errorData.error || errorData.message || 'Registration failed');
+      } else if (err.request) {
+        // Network error
         setError('Cannot connect to server. Please check your connection and try again.');
       } else {
+        // Other error
         setError('An unexpected error occurred. Please try again later.');
       }
     } finally {
