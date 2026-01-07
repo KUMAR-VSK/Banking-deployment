@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api';
 
 function AdminDashboard({ user, addNotification }) {
   const [users, setUsers] = useState([]);
@@ -28,15 +29,8 @@ function AdminDashboard({ user, addNotification }) {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/auth/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      }
+      const response = await api.get('/auth/admin/users');
+      setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
       addNotification('Failed to fetch users', 'error');
@@ -45,18 +39,11 @@ function AdminDashboard({ user, addNotification }) {
 
   const fetchLoans = async () => {
     try {
-      const response = await fetch('/api/admin/loans', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetched loans data:', data);
-        console.log('First loan user:', data[0]?.user);
-        setLoans(data);
-        setLoading(false);
-      }
+      const response = await api.get('/api/admin/loans');
+      console.log('Fetched loans data:', response.data);
+      console.log('First loan user:', response.data[0]?.user);
+      setLoans(response.data);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching loans:', error);
       addNotification('Failed to fetch loans', 'error');
