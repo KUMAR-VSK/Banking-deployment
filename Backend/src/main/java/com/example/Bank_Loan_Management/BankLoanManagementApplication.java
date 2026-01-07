@@ -58,7 +58,6 @@ public class BankLoanManagementApplication {
 				} else {
 					System.out.println("Default manager user already exists: manager");
 				}
-
 				System.out.println("Database initialization completed successfully");
 
 			} catch (Exception e) {
