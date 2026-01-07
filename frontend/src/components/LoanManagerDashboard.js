@@ -39,19 +39,9 @@ function LoanManagerDashboard({ user, addNotification }) {
 
   const handleVerifyLoan = async (loanId) => {
     try {
-      const response = await fetch(`/api/loan-manager/loans/verify/${loanId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        addNotification('Loan application verified successfully', 'success');
-        fetchLoans();
-      } else {
-        addNotification('Failed to verify loan application', 'error');
-      }
+      await api.post(`/api/loan-manager/loans/verify/${loanId}`);
+      addNotification('Loan application verified successfully', 'success');
+      fetchLoans();
     } catch (error) {
       console.error('Error verifying loan:', error);
       addNotification('Failed to verify loan application', 'error');
