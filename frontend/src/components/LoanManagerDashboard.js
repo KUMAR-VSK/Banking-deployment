@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from '../api';
 
 function LoanManagerDashboard({ user, addNotification }) {
   const [loans, setLoans] = useState([]);
@@ -14,15 +15,8 @@ function LoanManagerDashboard({ user, addNotification }) {
 
   const fetchLoans = async () => {
     try {
-      const response = await fetch('/api/loan-manager/loans', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setLoans(data);
-      }
+      const response = await api.get('/api/loan-manager/loans');
+      setLoans(response.data);
     } catch (error) {
       console.error('Error fetching loans:', error);
       addNotification('Failed to fetch loans', 'error');
@@ -32,25 +26,10 @@ function LoanManagerDashboard({ user, addNotification }) {
   const fetchDocuments = async () => {
     try {
       console.log('Fetching documents from /api/loan-manager/documents');
-      const token = localStorage.getItem('token');
-      console.log('Token present:', !!token);
-      const response = await fetch('/api/loan-manager/documents', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      console.log('Response status:', response.status);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetched documents:', data.length);
-        setDocuments(data);
-        setLoading(false);
-      } else {
-        const errorText = await response.text();
-        console.log('Error response:', errorText);
-        addNotification('Failed to fetch documents', 'error');
-        setLoading(false);
-      }
+      const response = await api.get('/api/loan-manager/documents');
+      console.log('Fetched documents:', response.data.length);
+      setDocuments(response.data);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching documents:', error);
       addNotification('Failed to fetch documents', 'error');
