@@ -50,19 +50,9 @@ function LoanManagerDashboard({ user, addNotification }) {
 
   const handleRejectLoan = async (loanId) => {
     try {
-      const response = await fetch(`/api/loan-manager/loans/reject/${loanId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        addNotification('Loan application rejected successfully', 'success');
-        fetchLoans();
-      } else {
-        addNotification('Failed to reject loan application', 'error');
-      }
+      await api.post(`/api/loan-manager/loans/reject/${loanId}`);
+      addNotification('Loan application rejected successfully', 'success');
+      fetchLoans();
     } catch (error) {
       console.error('Error rejecting loan:', error);
       addNotification('Failed to reject loan application', 'error');
