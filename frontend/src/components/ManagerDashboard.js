@@ -118,19 +118,9 @@ function ManagerDashboard({ user, addNotification }) {
 
   const handleApproveLoan = async (loanId) => {
     try {
-      const response = await fetch(`/api/manager/loans/approve/${loanId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        addNotification('Loan approved successfully', 'success');
-        fetchLoans();
-      } else {
-        addNotification('Failed to approve loan', 'error');
-      }
+      await api.post(`/api/manager/loans/approve/${loanId}`);
+      addNotification('Loan approved successfully', 'success');
+      fetchLoans();
     } catch (error) {
       console.error('Error approving loan:', error);
       addNotification('Failed to approve loan', 'error');
@@ -142,21 +132,9 @@ function ManagerDashboard({ user, addNotification }) {
     if (!reason) return;
 
     try {
-      const response = await fetch(`/api/manager/loans/reject/${loanId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ reason })
-      });
-
-      if (response.ok) {
-        addNotification('Loan rejected successfully', 'success');
-        fetchLoans();
-      } else {
-        addNotification('Failed to reject loan', 'error');
-      }
+      await api.post(`/api/manager/loans/reject/${loanId}`, { reason });
+      addNotification('Loan rejected successfully', 'success');
+      fetchLoans();
     } catch (error) {
       console.error('Error rejecting loan:', error);
       addNotification('Failed to reject loan', 'error');
@@ -365,5 +343,7 @@ function ManagerDashboard({ user, addNotification }) {
     </div>
   );
 }
+
+
 
 export default ManagerDashboard;
