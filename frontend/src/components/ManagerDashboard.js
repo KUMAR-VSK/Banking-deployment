@@ -43,41 +43,26 @@ function ManagerDashboard({ user, addNotification }) {
     ];
 
     try {
-      const response = await fetch('/api/manager/interest-rates', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await api.get('/api/manager/interest-rates');
+      const data = response.data;
+
+      // Create a map of existing rates
+      const existingRatesMap = {};
+      data.forEach(rate => {
+        existingRatesMap[rate.purpose] = rate;
       });
-      if (response.ok) {
-        const data = await response.json();
 
-        // Create a map of existing rates
-        const existingRatesMap = {};
-        data.forEach(rate => {
-          existingRatesMap[rate.purpose] = rate;
-        });
-
-        // Merge existing rates with defaults, prioritizing database values
-        const mergedRates = allPurposes.map(purpose => {
-          const existing = existingRatesMap[purpose.purpose];
-          return existing ? { ...existing } : {
-            id: null,
-            purpose: purpose.purpose,
-            rate: purpose.rate
-          };
-        });
-
-        setInterestRates(mergedRates);
-      } else {
-        // If API fails, show default rates
-        const defaultRates = allPurposes.map(purpose => ({
+      // Merge existing rates with defaults, prioritizing database values
+      const mergedRates = allPurposes.map(purpose => {
+        const existing = existingRatesMap[purpose.purpose];
+        return existing ? { ...existing } : {
           id: null,
           purpose: purpose.purpose,
           rate: purpose.rate
-        }));
-        setInterestRates(defaultRates);
-        addNotification('Using default interest rates', 'info');
-      }
+        };
+      });
+
+      setInterestRates(mergedRates);
     } catch (error) {
       console.error('Error fetching interest rates:', error);
       // Show default rates even if API fails
@@ -93,26 +78,13 @@ function ManagerDashboard({ user, addNotification }) {
 
   const updateInterestRate = async (purpose, rate) => {
     try {
-      const response = await fetch('/api/manager/interest-rates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ purpose, rate })
-      });
-      if (response.ok) {
-        addNotification('Interest rate updated successfully', 'success');
-        fetchInterestRates();
-        setEditingRates(prev => ({ ...prev, [purpose]: false }));
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to update interest rate:', response.status, errorText);
-        addNotification(`Failed to update interest rate: ${response.status} ${errorText}`, 'error');
-      }
+      await api.post('/api/manager/interest-rates', { purpose, rate });
+      addNotification('Interest rate updated successfully', 'success');
+      fetchInterestRates();
+      setEditingRates(prev => ({ ...prev, [purpose]: false }));
     } catch (error) {
       console.error('Error updating interest rate:', error);
-      addNotification('Failed to update interest rate: Network error', 'error');
+      addNotification('Failed to update interest rate', 'error');
     }
   };
 
@@ -343,6 +315,8 @@ function ManagerDashboard({ user, addNotification }) {
     </div>
   );
 }
+
+
 
 
 
