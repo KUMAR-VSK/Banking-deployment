@@ -37,10 +37,7 @@ function UserDashboard({ user }) {
     return Math.round(emi);
   };
 
-  const calculateTotalPayment = (principal, annualRate, tenureYears) => {
-    const emi = calculateEMI(principal, annualRate, tenureYears);
-    return emi * tenureYears * 12;
-  };
+
 
 
 
@@ -81,11 +78,11 @@ function UserDashboard({ user }) {
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/user/documents', {
+      const { data: documentsData } = await axios.get('/api/user/documents', {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Ensure response.data is an array
-      setDocuments(Array.isArray(response.data) ? response.data : []);
+      setDocuments(Array.isArray(documentsData) ? documentsData : []);
     } catch (error) {
       console.error('Error fetching documents:', error);
       setDocuments([]); // Ensure documents is always an array
