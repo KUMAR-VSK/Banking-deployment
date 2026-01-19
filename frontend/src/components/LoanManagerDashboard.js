@@ -85,21 +85,13 @@ function LoanManagerDashboard({ user, addNotification }) {
   const handleDocumentClick = async (documentId) => {
     try {
       console.log('Fetching document:', documentId);
-      const response = await fetch(`/api/loan-manager/documents/view/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await api.get(`/api/loan-manager/documents/view/${documentId}`, {
+        responseType: 'blob'
       });
       console.log('Response status:', response.status);
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-      } else {
-        const errorText = await response.text();
-        console.log('Error response:', errorText);
-        addNotification('Failed to fetch document', 'error');
-      }
+      const blob = new Blob([response.data]);
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
     } catch (error) {
       console.error('Error fetching document:', error);
       addNotification('Failed to fetch document', 'error');

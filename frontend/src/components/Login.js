@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -39,7 +39,7 @@ function Login({ onLogin }) {
     setSuccess('');
 
     try {
-      const response = await axios.post('/auth/login', formData);
+      const response = await api.post('/auth/login', formData);
 
       setSuccess('Login successful! Redirecting...');
       onLogin(response.data);

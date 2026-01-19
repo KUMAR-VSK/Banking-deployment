@@ -63,16 +63,9 @@ function AdminDashboard({ user, addNotification }) {
     setFormErrors({});
 
     try {
-      const response = await fetch('/auth/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(newUser)
-      });
+      const response = await api.post('/auth/admin/users', newUser);
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         setShowSuccess(true);
         addNotification('User created successfully', 'success');
 
@@ -117,19 +110,9 @@ function AdminDashboard({ user, addNotification }) {
     if (!window.confirm(confirmMessage)) return;
 
     try {
-      const response = await fetch(`/auth/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        addNotification('User deleted successfully', 'success');
-        fetchUsers();
-      } else {
-        addNotification('Failed to delete user', 'error');
-      }
+      await api.delete(`/auth/admin/users/${userId}`);
+      addNotification('User deleted successfully', 'success');
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
       addNotification('Failed to delete user', 'error');
@@ -158,17 +141,9 @@ function AdminDashboard({ user, addNotification }) {
     if (!window.confirm(`Are you sure you want to delete ${selectedUsers.length} users?`)) return;
 
     try {
-      const deletePromises = selectedUsers.map(userId =>
-        fetch(`/auth/admin/users/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        })
-      );
-
+      const deletePromises = selectedUsers.map(userId => api.delete(`/auth/admin/users/${userId}`));
       const results = await Promise.all(deletePromises);
-      const successCount = results.filter(response => response.ok).length;
+      const successCount = results.filter(response => response.status === 200 || response.status === 204).length;
 
       if (successCount > 0) {
         addNotification(`${successCount} users deleted successfully`, 'success');
