@@ -1,0 +1,17 @@
+# Build artifacts
+Backend/target/
+Backend/.mvn/wrapper/
+.git/
+.gitignore
+README.md
+HELP.md
+*.log
+.env
+frontend/
+uploads/
+test-*
+debug-*
+*.md
+.DS_Store
+.vscode/
+.idea/
