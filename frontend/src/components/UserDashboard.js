@@ -128,7 +128,7 @@ function UserDashboard({ user }) {
       uploadFormData.append('file', selectedFile);
       uploadFormData.append('documentType', documentType);
 
-      const response = await axios.post('/api/user/documents/upload', uploadFormData, {
+      await axios.post('/api/user/documents/upload', uploadFormData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
