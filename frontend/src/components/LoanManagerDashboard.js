@@ -11,7 +11,7 @@ function LoanManagerDashboard({ user, addNotification }) {
   useEffect(() => {
     fetchLoans();
     fetchDocuments();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLoans = async () => {
     try {
@@ -59,49 +59,7 @@ function LoanManagerDashboard({ user, addNotification }) {
     }
   };
 
-  const handleVerifyDocument = async (documentId) => {
-    try {
-      const response = await fetch(`/api/loan-manager/documents/verify/${documentId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
 
-      if (response.ok) {
-        addNotification('Document verified successfully', 'success');
-        fetchDocuments();
-        fetchLoans(); // Refresh loans to update verification status
-      } else {
-        addNotification('Failed to verify document', 'error');
-      }
-    } catch (error) {
-      console.error('Error verifying document:', error);
-      addNotification('Failed to verify document', 'error');
-    }
-  };
-
-  const handleRejectDocument = async (documentId) => {
-    try {
-      const response = await fetch(`/api/loan-manager/documents/reject/${documentId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (response.ok) {
-        addNotification('Document rejected successfully', 'success');
-        fetchDocuments();
-        fetchLoans(); // Refresh loans to update verification status
-      } else {
-        addNotification('Failed to reject document', 'error');
-      }
-    } catch (error) {
-      console.error('Error rejecting document:', error);
-      addNotification('Failed to reject document', 'error');
-    }
-  };
 
   const filteredLoans = loans.filter(loan => {
     const matchesSearch = loan.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||

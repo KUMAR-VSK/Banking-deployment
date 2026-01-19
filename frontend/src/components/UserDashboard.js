@@ -42,20 +42,15 @@ function UserDashboard({ user }) {
     return emi * tenureYears * 12;
   };
 
-  const calculateTotalInterest = (principal, annualRate, tenureYears) => {
-    const totalPayment = calculateTotalPayment(principal, annualRate, tenureYears);
-    return totalPayment - principal;
-  };
+
 
   const fetchLoans = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/user/loans', {
+      const { data: loansData } = await axios.get('/api/user/loans', {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      let loansData = response.data;
 
       // Handle different response formats
       if (Array.isArray(loansData)) {
@@ -187,16 +182,7 @@ function UserDashboard({ user }) {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    // Clear any previous messages when user starts editing
-    if (message) {
-      setMessage('');
-    }
-  };
+
 
   const hasDocumentsUploaded = () => {
     return documents.length > 0;

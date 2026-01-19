@@ -25,7 +25,7 @@ function AdminDashboard({ user, addNotification }) {
   useEffect(() => {
     fetchUsers();
     fetchLoans();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUsers = async () => {
     try {

@@ -13,7 +13,7 @@ function ManagerDashboard({ user, addNotification }) {
   useEffect(() => {
     fetchLoans();
     fetchInterestRates();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchLoans = async () => {
     try {
