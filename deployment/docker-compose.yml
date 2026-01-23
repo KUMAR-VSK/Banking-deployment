@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: bank-loan-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: banking_master
+      MYSQL_USER: root
+      MYSQL_PASSWORD: vsk@1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./deployment/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - bank-loan-network
+
+  # Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile.backend
+    container_name: bank-loan-backend
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATABASE_URL=jdbc:mysql://mysql:3306/banking_master?createDatabaseIfNotExist=true
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=vsk@1234
+      - JWT_SECRET=mySuperSecretKeyThatIsAtLeast32CharactersLong
+      - JWT_EXPIRATION=86400000
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - bank-loan-network
+
+  # Frontend Application
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: bank-loan-frontend
+    restart: unless-stopped
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8080
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - bank-loan-network
+
+volumes:
+  mysql_data:
+
+networks:
+  bank-loan-network:
+    driver: bridge
