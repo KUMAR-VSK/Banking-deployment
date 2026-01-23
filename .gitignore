@@ -33,6 +33,10 @@ logs
 .env.development.local
 .env.test.local
 .env.production.local
+frontend/.env.production
+
+# Shell scripts
+*.sh
 
 # Database files
 *.db
