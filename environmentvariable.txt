@@ -2,10 +2,10 @@
 
 ## Frontend (Vercel)
 # Paste your Vercel app URL here
-FRONTEND_URL= https://banking-deployment.vercel.app
+FRONTEND_URL=https://banking-deployment.vercel.app
 
 # Backend API base URL (replace with your Render backend URL)
-REACT_APP_API_BASE_URL= https://banking-deployment.onrender.com
+REACT_APP_API_BASE_URL=https://banking-deployment.onrender.com
 
 # Additional frontend environment variables
 REACT_APP_APP_NAME=Bank Loan Management System
@@ -65,8 +65,8 @@ DB_CONNECTION_URL=jdbc:mysql://mysql-27b8db95-kumarvsofficial-db0c.j.aivencloud.
 ## Deployment URLs
 # Paste your deployed URLs here
 
-Frontend URL (Vercel):https://banking-deployment.vercel.app
-Backend URL (Render):https://banking-deployment.onrender.com
+Frontend URL (Vercel): https://banking-deployment.vercel.app
+Backend URL (Render): https://banking-deployment.onrender.com
 Database URL (Aiven): mysql-27b8db95-kumarvsofficial-db0c.j.aivencloud.com
 
 ## Additional Configuration
