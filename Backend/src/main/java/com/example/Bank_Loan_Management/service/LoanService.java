@@ -53,7 +53,7 @@ public class LoanService {
         LoanApplication saved = loanApplicationRepository.save(application);
 
         // Link existing documents to this loan application
-        List<Document> userDocuments = documentRepository.findByUserIdAndLoanApplicationIsNull(user.getId());
+        List<Document> userDocuments = documentRepository.findByUser_IdAndLoanApplicationIsNull(user.getId());
         for (Document document : userDocuments) {
             document.setLoanApplication(saved);
             documentRepository.save(document);

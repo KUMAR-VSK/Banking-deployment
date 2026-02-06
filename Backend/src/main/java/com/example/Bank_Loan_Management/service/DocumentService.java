@@ -61,7 +61,7 @@ public class DocumentService {
     }
 
     public List<Document> getDocumentsByLoanApplication(Long loanApplicationId) {
-        return documentRepository.findByLoanApplicationId(loanApplicationId);
+        return documentRepository.findByLoanApplication_Id(loanApplicationId);
     }
 
     public List<Document> getDocumentsByUser(User user) {
