@@ -12,11 +12,11 @@ import com.example.Bank_Loan_Management.entity.User;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
-    List<Document> findByLoanApplicationId(Long loanApplicationId);
-    List<Document> findByLoanApplicationIdAndStatus(Long loanApplicationId, Document.Status status);
+    List<Document> findByLoanApplication_Id(Long loanApplicationId);
+    List<Document> findByLoanApplication_IdAndStatus(Long loanApplicationId, Document.Status status);
 
     @Query("SELECT d FROM Document d LEFT JOIN FETCH d.loanApplication WHERE d.user = :user")
     List<Document> findByUser(@Param("user") User user);
 
-    List<Document> findByUserIdAndLoanApplicationIsNull(Long userId);
+    List<Document> findByUser_IdAndLoanApplicationIsNull(Long userId);
 }
