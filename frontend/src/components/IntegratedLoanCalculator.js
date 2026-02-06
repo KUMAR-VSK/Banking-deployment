@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
@@ -30,9 +30,7 @@ function IntegratedLoanCalculator({ formData, onFormDataChange }) {
 
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/manager/interest-rates', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/api/manager/interest-rates');
         // Start with default rates
         const ratesObject = { ...defaultRates };
         // Update with fetched rates
@@ -122,7 +120,7 @@ function IntegratedLoanCalculator({ formData, onFormDataChange }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let processedValue = value;
-    
+
     if (name === 'amount') {
       const numValue = parseFloat(value) || 0;
       processedValue = Math.max(0, Math.min(numValue, 100000000)); // Cap at 10Cr
@@ -130,7 +128,7 @@ function IntegratedLoanCalculator({ formData, onFormDataChange }) {
       const numValue = parseFloat(value) || 0;
       processedValue = Math.max(1, Math.min(numValue, 30)); // Between 1-30 years
     }
-    
+
     onFormDataChange({
       ...formData,
       [name]: name === 'amount' || name === 'termYears' ? processedValue : value
@@ -167,7 +165,7 @@ function IntegratedLoanCalculator({ formData, onFormDataChange }) {
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             return `₹${context.parsed.toLocaleString()}`;
           }
         }
@@ -184,7 +182,7 @@ function IntegratedLoanCalculator({ formData, onFormDataChange }) {
           <p>Choose your loan purpose to get personalized interest rates</p>
         </div>
         <div className="purpose-selector">
-                      <label>Loan Purpose</label>
+          <label>Loan Purpose</label>
           <div className="form-group">
             {/* <label>Loan Purpose</label> */}
             <select

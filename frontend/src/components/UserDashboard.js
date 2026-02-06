@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import IntegratedLoanCalculator from './IntegratedLoanCalculator';
 
 function UserDashboard({ user }) {
@@ -33,7 +33,7 @@ function UserDashboard({ user }) {
     const tenureMonths = tenureYears * 12;
     const monthlyRate = annualRate / 12 / 100;
     const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
-                (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+      (Math.pow(1 + monthlyRate, tenureMonths) - 1);
     return Math.round(emi);
   };
 
@@ -45,9 +45,7 @@ function UserDashboard({ user }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const { data: loansData } = await axios.get('/api/user/loans', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data: loansData } = await api.get('/api/user/loans');
 
       // Handle different response formats
       if (Array.isArray(loansData)) {
@@ -78,9 +76,7 @@ function UserDashboard({ user }) {
   const fetchDocuments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const { data: documentsData } = await axios.get('/api/user/documents', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data: documentsData } = await api.get('/api/user/documents');
       // Ensure response.data is an array
       setDocuments(Array.isArray(documentsData) ? documentsData : []);
     } catch (error) {
@@ -128,9 +124,8 @@ function UserDashboard({ user }) {
       uploadFormData.append('file', selectedFile);
       uploadFormData.append('documentType', documentType);
 
-      await axios.post('/api/user/documents/upload', uploadFormData, {
+      await api.post('/api/user/documents/upload', uploadFormData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
@@ -209,9 +204,7 @@ function UserDashboard({ user }) {
         purpose: formData.purpose
       };
       console.log('Making API call with data:', requestData);
-      await axios.post('/api/user/loans/apply', requestData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/api/user/loans/apply', requestData);
       console.log('API call successful');
       setMessage('Loan application submitted successfully!');
       setFormData({ amount: 1000000, termYears: 10, purpose: '', interestRate: 8.5 });
@@ -438,7 +431,7 @@ function UserDashboard({ user }) {
             </div>
           </div>
         </div>
-        
+
 
 
 
@@ -540,58 +533,58 @@ function UserDashboard({ user }) {
       <div className="document-status card">
         <h3>📄 Document Status</h3>
         <div className="documents-list">
-           <div className="table-header">
-             <h4>Uploaded Documents</h4>
-             <button
-               onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-               className="sort-toggle-btn"
-               title={`Currently ${sortOrder === 'desc' ? 'newest' : 'oldest'} first. Click to reverse order.`}
-             >
-               {sortOrder === 'desc' ? '⬇️ Newest First' : '⬆️ Oldest First'}
-             </button>
-           </div>
-           {documents.some(doc => doc.status === 'REJECTED') && (
-             <div className="document-warning">
-               ⚠️ Some documents were rejected. Please upload new versions of rejected documents in the loan application section above.
-             </div>
-           )}
-           {sortedDocuments.length > 0 ? (
-             <div className="documents-table-container">
-               <table className="documents-table">
-                 <thead>
-                   <tr>
-                     <th>Loan ID</th>
-                     <th>Type</th>
-                     <th>File Name</th>
-                     <th>Status</th>
-                     <th>Size</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                   {sortedDocuments.map(doc => (
-                     <tr key={doc.id} className={doc.status === 'REJECTED' ? 'rejected-row' : ''}>
-                       <td>{doc.loanApplicationId || 'N/A'}</td>
-                       <td>{doc.documentType}</td>
-                       <td>{doc.fileName}</td>
-                       <td>
-                         <span className={`status status-${doc.status.toLowerCase()}`}>
-                           {doc.status}
-                         </span>
-                       </td>
-                       <td>{(doc.fileSize / 1024).toFixed(2)} KB</td>
-                     </tr>
-                   ))}
-                 </tbody>
-               </table>
-             </div>
-           ) : (
-             <p className="no-documents">No documents uploaded yet.</p>
-           )}
-         </div>
+          <div className="table-header">
+            <h4>Uploaded Documents</h4>
+            <button
+              onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+              className="sort-toggle-btn"
+              title={`Currently ${sortOrder === 'desc' ? 'newest' : 'oldest'} first. Click to reverse order.`}
+            >
+              {sortOrder === 'desc' ? '⬇️ Newest First' : '⬆️ Oldest First'}
+            </button>
+          </div>
+          {documents.some(doc => doc.status === 'REJECTED') && (
+            <div className="document-warning">
+              ⚠️ Some documents were rejected. Please upload new versions of rejected documents in the loan application section above.
+            </div>
+          )}
+          {sortedDocuments.length > 0 ? (
+            <div className="documents-table-container">
+              <table className="documents-table">
+                <thead>
+                  <tr>
+                    <th>Loan ID</th>
+                    <th>Type</th>
+                    <th>File Name</th>
+                    <th>Status</th>
+                    <th>Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedDocuments.map(doc => (
+                    <tr key={doc.id} className={doc.status === 'REJECTED' ? 'rejected-row' : ''}>
+                      <td>{doc.loanApplicationId || 'N/A'}</td>
+                      <td>{doc.documentType}</td>
+                      <td>{doc.fileName}</td>
+                      <td>
+                        <span className={`status status-${doc.status.toLowerCase()}`}>
+                          {doc.status}
+                        </span>
+                      </td>
+                      <td>{(doc.fileSize / 1024).toFixed(2)} KB</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="no-documents">No documents uploaded yet.</p>
+          )}
+        </div>
       </div>
 
     </div>
-    
+
   );
 }
 
