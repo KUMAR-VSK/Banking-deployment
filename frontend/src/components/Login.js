@@ -61,20 +61,20 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="max-w-md mx-auto backdrop-blur-2xl rounded-2xl p-10 shadow-2xl border border-gray-700/50 min-h-[500px] relative overflow-hidden" style={{ backgroundColor: 'rgba(30, 41, 59, 0.95)' }}>
-      <div className="text-center mb-8">
-        <div className="text-6xl mb-4 drop-shadow-lg">🔐</div>
-        <h2 className="text-gray-100 text-3xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-sm mb-3">Login</h2>
-        <p className="text-gray-300 text-lg">Welcome back! Please sign in to your account</p>
+    <div className="auth-container">
+      <div className="auth-header">
+        <div className="auth-icon">🔐</div>
+        <h2 className="auth-title">Login</h2>
+        <p className="auth-subtitle">Welcome back! Please sign in to your account</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="auth-form">
 
         {/* USERNAME */}
-        <div className="relative mb-6">
-          <label className="block mb-2 text-gray-300 text-base font-semibold">Username</label>
-          <div className="relative flex items-center">
-            <span className="absolute left-5 text-primary-600 text-xl z-10 transition-all duration-300 opacity-70">👤</span>
+        <div className="auth-field">
+          <label className="auth-label">Username</label>
+          <div className="auth-input-wrapper">
+            <span className="auth-input-icon">👤</span>
             <input
               type="text"
               name="username"
@@ -83,17 +83,17 @@ function Login({ onLogin }) {
               placeholder="Enter your username"
               autoComplete="username"
               required
-              className="w-full h-12 px-5 pl-14 border-2 border-gray-600 rounded-xl text-lg transition-all duration-300 bg-gray-800/90 backdrop-blur-sm shadow-sm focus:outline-none focus:border-primary-500 focus:shadow-lg focus:bg-gray-800 focus:-translate-y-0.5 text-gray-200 placeholder:text-gray-500"
+              className="auth-input"
             />
           </div>
-          <small className="block mt-2 text-sm text-gray-400 italic">Enter your username</small>
+          <small className="auth-hint">Enter your username</small>
         </div>
 
         {/* PASSWORD */}
-        <div className="relative mb-6">
-          <label className="block mb-2 text-gray-300 text-base font-semibold">Password</label>
-          <div className="relative flex items-center">
-            <span className="absolute left-5 text-primary-600 text-xl z-10 transition-all duration-300 opacity-70">🔒</span>
+        <div className="auth-field">
+          <label className="auth-label">Password</label>
+          <div className="auth-input-wrapper">
+            <span className="auth-input-icon">🔒</span>
             <input
               type="password"
               name="password"
@@ -102,34 +102,46 @@ function Login({ onLogin }) {
               placeholder="Enter your password"
               autoComplete="current-password"
               required
-              className="w-full h-12 px-5 pl-14 border-2 border-gray-600 rounded-xl text-lg transition-all duration-300 bg-gray-800/90 backdrop-blur-sm shadow-sm focus:outline-none focus:border-primary-500 focus:shadow-lg focus:bg-gray-800 focus:-translate-y-0.5 text-gray-200 placeholder:text-gray-500"
+              className="auth-input"
             />
           </div>
-          <small className="block mt-2 text-sm text-gray-400 italic">Enter your password</small>
+          <small className="auth-hint">Enter your password</small>
         </div>
 
         {error && (
-          <div className="p-4 rounded-xl mb-6 flex items-start gap-3 font-medium bg-red-50 text-red-700 border border-red-200">
-            <span className="text-xl flex-shrink-0">⚠️</span>
+          <div className="message error">
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>⚠️</span>
             {error}
           </div>
         )}
 
         {success && (
-          <div className="p-4 rounded-xl mb-6 flex items-start gap-3 font-medium bg-green-50 text-green-700 border border-green-200">
-            <span className="text-xl flex-shrink-0">✅</span>
+          <div className="message success">
+            <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>✅</span>
             {success}
           </div>
         )}
 
-        <button type="submit" className="bg-gradient-to-br from-primary-600 to-primary-800 text-white px-7 py-4 rounded-xl text-lg font-bold transition-all duration-300 shadow-lg flex items-center justify-center gap-3 mt-4 uppercase tracking-wide hover:bg-gradient-to-br hover:from-primary-700 hover:to-primary-900 hover:-translate-y-1 hover:scale-105 hover:shadow-xl active:translate-y-0 active:scale-100 active:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative" disabled={loading}>
-          {loading && <span className="absolute top-1/2 left-1/2 w-6 h-6 -mt-3 -ml-3 border-2 border-white/30 rounded-full border-t-white animate-spin"></span>}
+        <button type="submit" className="auth-button" disabled={loading}>
+          {loading && <span style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: '1.5rem',
+            height: '1.5rem',
+            marginTop: '-0.75rem',
+            marginLeft: '-0.75rem',
+            border: '2px solid rgba(255,255,255,0.3)',
+            borderRadius: '50%',
+            borderTopColor: 'white',
+            animation: 'spin 1s linear infinite'
+          }}></span>}
           {loading ? 'Signing In...' : '🚀 Sign In'}
         </button>
       </form>
 
-      <div className="text-center mt-8 pt-6 border-t border-purple-200/10">
-        <p className="text-gray-300 text-base">Don't have an account? <a href="/register" className="text-purple-400 font-bold transition-all duration-300 px-1 py-0.5 rounded hover:text-purple-300 hover:bg-purple-900/30 hover:-translate-y-0.5">Sign up</a></p>
+      <div className="auth-footer">
+        <p className="auth-footer-text">Don't have an account? <a href="/register" className="auth-link">Sign up</a></p>
       </div>
     </div>
   );

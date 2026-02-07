@@ -12,7 +12,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    return saved ? JSON.parse(saved) : false; // Default to light mode for professional banking theme
   });
   const [notifications, setNotifications] = useState([]);
 
@@ -93,9 +93,9 @@ function App() {
       path: "/",
       element: user ? (
         user.role === 'ADMIN' ? <Navigate to="/admin" /> :
-        user.role === 'LOAN_MANAGER' ? <Navigate to="/loan-manager" /> :
-        user.role === 'MANAGER' ? <Navigate to="/manager" /> :
-        <Navigate to="/user" />
+          user.role === 'LOAN_MANAGER' ? <Navigate to="/loan-manager" /> :
+            user.role === 'MANAGER' ? <Navigate to="/manager" /> :
+              <Navigate to="/user" />
       ) : <Navigate to="/login" />
     },
     {
@@ -123,18 +123,17 @@ function App() {
         {notifications.map(notification => (
           <div
             key={notification.id}
-            className={`bg-white rounded-lg p-4 shadow-lg border-l-4 cursor-pointer transition-all duration-300 flex items-center gap-3 max-w-sm ${
-              notification.type === 'success' ? 'border-l-green-500 bg-green-50' :
-              notification.type === 'error' ? 'border-l-red-500 bg-red-50' :
-              notification.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50' :
-              'border-l-blue-500 bg-blue-50'
-            }`}
+            className={`bg-white rounded-lg p-4 shadow-lg border-l-4 cursor-pointer transition-all duration-300 flex items-center gap-3 max-w-sm ${notification.type === 'success' ? 'border-l-green-500 bg-green-50' :
+                notification.type === 'error' ? 'border-l-red-500 bg-red-50' :
+                  notification.type === 'warning' ? 'border-l-yellow-500 bg-yellow-50' :
+                    'border-l-blue-500 bg-blue-50'
+              }`}
             onClick={() => removeNotification(notification.id)}
           >
             <span className="text-lg">
               {notification.type === 'success' ? '✅' :
-               notification.type === 'error' ? '❌' :
-               notification.type === 'warning' ? '⚠️' : 'ℹ️'}
+                notification.type === 'error' ? '❌' :
+                  notification.type === 'warning' ? '⚠️' : 'ℹ️'}
             </span>
             <span className="flex-1 text-sm font-medium text-gray-800">{notification.message}</span>
             <button
