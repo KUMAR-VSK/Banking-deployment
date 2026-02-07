@@ -11,10 +11,16 @@ public class NotificationService {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     public void sendNotification(String topic, String message) {
-        if (kafkaTemplate != null) {
-            kafkaTemplate.send(topic, message);
-        } else {
-            System.out.println("Kafka not available, logging notification: " + message);
+        try {
+            if (kafkaTemplate != null) {
+                kafkaTemplate.send(topic, message);
+                System.out.println("Notification sent to Kafka: " + message);
+            } else {
+                System.out.println("Kafka not available, logging notification: " + message);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send notification to Kafka: " + e.getMessage());
+            System.out.println("Logging notification instead: " + message);
         }
     }
 

@@ -181,6 +181,13 @@ public class LoanController {
         }
     }
 
+    // Public interest rates endpoint for all authenticated users
+    @GetMapping("/user/interest-rates")
+    public ResponseEntity<List<InterestRate>> getInterestRatesForUsers() {
+        List<InterestRate> rates = interestRateRepository.findAll();
+        return ResponseEntity.ok(rates);
+    }
+
     @GetMapping("/user/loans")
     public ResponseEntity<List<LoanSummaryDTO>> getMyLoans(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())

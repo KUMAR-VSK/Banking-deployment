@@ -29,7 +29,7 @@ function IntegratedLoanCalculator({ formData, onFormDataChange }) {
       };
 
       try {
-        const response = await api.get('/api/manager/interest-rates');
+        const response = await api.get('/api/user/interest-rates');
         // Start with default rates
         const ratesObject = { ...defaultRates };
         // Update with fetched rates
