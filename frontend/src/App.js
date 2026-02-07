@@ -117,7 +117,7 @@ function App() {
   ]);
 
   return (
-    <div className="font-sans w-full p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 bg-fixed min-h-screen relative">
+    <div className={`font-sans w-full p-4 bg-fixed min-h-screen relative transition-colors duration-300 ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-blue-50 via-slate-100 to-blue-50'}`}>
       {/* Notification Container */}
       <div className="fixed top-24 right-5 z-50 flex flex-col gap-2 max-w-sm">
         {notifications.map(notification => (
@@ -150,7 +150,7 @@ function App() {
         ))}
       </div>
 
-      <header className="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white p-6 rounded-xl mb-6 shadow-2xl backdrop-blur-md border border-yellow-500/20 relative overflow-hidden">
+      <header className={`p-6 rounded-xl mb-6 shadow-2xl backdrop-blur-md border relative overflow-hidden transition-all duration-300 ${darkMode ? 'bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white border-yellow-500/20' : 'bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 text-white border-white/30'}`}>
         <div className="flex justify-between items-center w-full">
           <h1 className="m-0 text-4xl flex-shrink-0">Bank Loan Management System</h1>
           <nav className="flex items-center gap-4">
@@ -176,7 +176,7 @@ function App() {
           </nav>
         </div>
       </header>
-      <main className="backdrop-blur-xl rounded-2xl p-6 md:p-8 lg:p-10 shadow-xl border border-gray-700/50 min-h-[500px] relative overflow-hidden w-full" style={{ backgroundColor: 'rgba(15, 23, 42, 0.95)' }}>
+      <main className={`backdrop-blur-xl rounded-2xl p-6 md:p-8 lg:p-10 shadow-xl border min-h-[500px] relative overflow-hidden w-full transition-all duration-300 ${darkMode ? 'border-gray-700/50' : 'border-gray-200/50 bg-white/80'}`} style={{ backgroundColor: darkMode ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)' }}>
         <RouterProvider router={router} />
       </main>
     </div>
