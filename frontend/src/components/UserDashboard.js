@@ -44,7 +44,6 @@ function UserDashboard({ user }) {
   const fetchLoans = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
       const { data: loansData } = await api.get('/api/user/loans');
 
       // Handle different response formats
@@ -75,7 +74,6 @@ function UserDashboard({ user }) {
 
   const fetchDocuments = async () => {
     try {
-      const token = localStorage.getItem('token');
       const { data: documentsData } = await api.get('/api/user/documents');
       // Ensure response.data is an array
       setDocuments(Array.isArray(documentsData) ? documentsData : []);
