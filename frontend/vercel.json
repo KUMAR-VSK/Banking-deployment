@@ -1,44 +1,17 @@
 {
   "version": 2,
-  "name": "bank-loan-frontend",
-  "builds": [
+
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
+      "source": "/api/(.*)",
+      "destination": "https://banking-deployment.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
-  "routes": [
-    {
-      "src": "/manifest.json",
-      "dest": "/manifest.json",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=0, must-revalidate"
-      }
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "https://banking-deployment.onrender.com/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "env": {
-    "REACT_APP_API_BASE_URL": "https://banking-deployment.onrender.com"
-  },
+
   "headers": [
     {
       "source": "/manifest.json",
@@ -53,5 +26,9 @@
         }
       ]
     }
-  ]
+  ],
+
+  "env": {
+    "REACT_APP_API_BASE_URL": "https://banking-deployment.onrender.com"
+  }
 }
